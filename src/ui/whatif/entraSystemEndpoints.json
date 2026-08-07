@@ -1,0 +1,11 @@
+{
+  "description": "Static, manually-curated list of well-known Microsoft Entra identity endpoints that pre-empt Internet Access / Private Access / M365 traffic-forwarding evaluation. The Microsoft Entra system traffic profile is NOT exposed by Microsoft Graph (no `entra` value on `trafficForwardingType`, no dedicated resource) — see docs/Policy-Research.md §2.1/§4.1 and docs/WhatIf-Spec.md §3.1/§8 open question 7. This file is a heuristic, not Graph-sourced data; update it if Microsoft adds/changes Entra identity endpoints. `pattern` supports an exact host or a `*.suffix` wildcard, same syntax as an FQDN filtering rule.",
+  "lastReviewed": "2026-07-24",
+  "endpoints": [
+    { "pattern": "login.microsoftonline.com", "note": "Primary Microsoft Entra ID sign-in endpoint" },
+    { "pattern": "login.microsoft.com", "note": "Alternate Microsoft Entra ID sign-in endpoint" },
+    { "pattern": "login.windows.net", "note": "Legacy Microsoft Entra ID sign-in endpoint" },
+    { "pattern": "device.login.microsoftonline.com", "note": "Device-code / device registration endpoint" },
+    { "pattern": "autologon.microsoftazuread-sso.com", "note": "Seamless SSO endpoint" }
+  ]
+}

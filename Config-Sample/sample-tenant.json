@@ -1,0 +1,722 @@
+{
+  "_comment": "Sample fixture for the GSA Policy Workbench file-based data source (docs/architecture.md §6.4). This is the Graph-wire body of GET /networkAccess/filteringProfiles?$expand=policies($expand=policy($expand=policyRules)),conditionalAccessPolicies. policyRules are inline, so the loader takes Branch A. Mirroring live Graph: the policy-link's @odata.type (filteringPolicyLink) is the type discriminant — the nested filtering policy omits @odata.type — and the allow/block action lives on the nested policy (policy.action). All IDs are fabricated and contain no tenant data.",
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#networkAccess/filteringProfiles",
+  "value": [
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.filteringProfile",
+      "id": "00000000-0000-0000-0000-000000000001",
+      "name": "Baseline Internet Access",
+      "description": "Default web filtering for all corporate users.",
+      "state": "enabled",
+      "priority": 100,
+      "createdDateTime": "2026-01-15T09:00:00Z",
+      "lastModifiedDateTime": "2026-05-02T14:30:00Z",
+      "policies": [
+        {
+          "@odata.type": "#microsoft.graph.networkaccess.filteringPolicyLink",
+          "id": "10000000-0000-0000-0000-000000000001",
+          "state": "enabled",
+          "loggingState": "enabled",
+          "priority": 1,
+          "policy": {
+            "id": "20000000-0000-0000-0000-000000000001",
+            "name": "Block High-Risk Categories",
+            "description": "Blocks adult, gambling, and known-malicious web categories.",
+            "version": "1",
+            "action": "block",
+            "policyRules": [
+              {
+                "@odata.type": "#microsoft.graph.networkaccess.webCategoryFilteringRule",
+                "id": "30000000-0000-0000-0000-000000000001",
+                "name": "Block adult and gambling",
+                "priority": 100,
+                "ruleType": "webCategory",
+                "destinations": [
+                  {
+                    "@odata.type": "#microsoft.graph.networkaccess.webCategory",
+                    "name": "AdultContent",
+                    "displayName": "Adult Content",
+                    "group": "Adult"
+                  },
+                  {
+                    "@odata.type": "#microsoft.graph.networkaccess.webCategory",
+                    "name": "Gambling",
+                    "displayName": "Gambling",
+                    "group": "Adult"
+                  }
+                ]
+              },
+              {
+                "@odata.type": "#microsoft.graph.networkaccess.fqdnFilteringRule",
+                "id": "30000000-0000-0000-0000-000000000002",
+                "name": "Block known-bad domain",
+                "priority": 200,
+                "ruleType": "fqdn",
+                "destinations": [
+                  {
+                    "@odata.type": "#microsoft.graph.networkaccess.fqdn",
+                    "value": "malware.example.com"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "@odata.type": "#microsoft.graph.networkaccess.filePolicyLink",
+          "id": "10000000-0000-0000-0000-0000000000c1",
+          "state": "enabled",
+          "version": "1.0.0",
+          "policy": {
+            "@odata.type": "#microsoft.graph.networkaccess.filePolicy",
+            "id": "20000000-0000-0000-0000-0000000000c1",
+            "name": "Data Protection - Outbound",
+            "description": "Content inspection for outbound uploads.",
+            "version": "1.0.0",
+            "settings": { "defaultAction": "allow" },
+            "policyRules": [
+              {
+                "@odata.type": "#microsoft.graph.networkaccess.fileRule",
+                "id": "30000000-0000-0000-0000-0000000000c1",
+                "name": "Block document upload",
+                "priority": 101,
+                "description": "Block upload of documents to external sites",
+                "action": "block",
+                "settings": { "status": "enabled" },
+                "matchingConditions": {
+                  "identities": null,
+                  "destinations": [
+                    {
+                      "@odata.type": "#microsoft.graph.networkaccess.filePolicyFqdnDestination",
+                      "values": ["*.example-corp.com", "*.contoso.com"]
+                    }
+                  ],
+                  "fileAttributes": {
+                    "activities": "upload",
+                    "contentTypes": ["application/pdf", "application/zip", "application/gzip"],
+                    "textContentTypes": []
+                  },
+                  "sources": { "sessionType": "user,agent" }
+                }
+              },
+              {
+                "@odata.type": "#microsoft.graph.networkaccess.fileRule",
+                "id": "30000000-0000-0000-0000-0000000000c2",
+                "name": "Purview scan Office docs",
+                "priority": 102,
+                "description": "Scan Office documents with Microsoft Purview",
+                "action": "scanPurview",
+                "settings": { "status": "enabled" },
+                "matchingConditions": {
+                  "identities": null,
+                  "destinations": [
+                    {
+                      "@odata.type": "#microsoft.graph.networkaccess.filePolicyWebCategoryDestination",
+                      "values": ["Business", "WebBasedEmail", "WebRepositoryAndStorage", "SocialNetworking", "CodeRepositories"]
+                    }
+                  ],
+                  "fileAttributes": {
+                    "activities": "download,upload",
+                    "contentTypes": ["application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+                    "textContentTypes": []
+                  },
+                  "sources": { "sessionType": "user,agent" }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallPolicyLink",
+          "id": "10000000-0000-0000-0000-0000000000d1",
+          "state": "enabled",
+          "version": "1.0.0",
+          "policy": {
+            "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallPolicy",
+            "id": "20000000-0000-0000-0000-0000000000d1",
+            "name": "CFW-Pol-001",
+            "description": "Layer 3/4 firewall for corporate egress.",
+            "version": "1.0.0",
+            "settings": { "defaultAction": "allow" },
+            "policyRules": [
+              {
+                "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallRule",
+                "id": "30000000-0000-0000-0000-0000000000d1",
+                "name": "CFW-Rule-001",
+                "priority": 201,
+                "description": "",
+                "action": "block",
+                "settings": { "status": "disabled" },
+                "matchingConditions": {
+                  "sources": {
+                    "ports": ["0-65535"],
+                    "addresses": [
+                      {
+                        "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallSourceIpAddress",
+                        "values": ["10.10.10.0/24"]
+                      }
+                    ]
+                  },
+                  "destinations": {
+                    "ports": ["88", "445"],
+                    "protocols": "tcp,udp",
+                    "addresses": [
+                      {
+                        "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallDestinationIpAddress",
+                        "values": ["10.10.10.0/24"]
+                      },
+                      {
+                        "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallDestinationFqdnAddress",
+                        "values": ["cifs.contoso.com"]
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallRule",
+                "id": "30000000-0000-0000-0000-0000000000d2",
+                "name": "CFW-Rule-002",
+                "priority": 202,
+                "description": "",
+                "action": "allow",
+                "settings": { "status": "enabled" },
+                "matchingConditions": {
+                  "sources": {
+                    "ports": ["0-65535"],
+                    "addresses": [
+                      {
+                        "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallSourceIpAddress",
+                        "values": ["0.0.0.0/0"]
+                      }
+                    ]
+                  },
+                  "destinations": {
+                    "ports": ["8080", "8443"],
+                    "protocols": "tcp",
+                    "addresses": [
+                      {
+                        "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallDestinationIpAddress",
+                        "values": ["192.168.178.0/24"]
+                      },
+                      {
+                        "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallDestinationFqdnAddress",
+                        "values": ["api.fritz.box.de"]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "conditionalAccessPolicies": [
+        {
+          "id": "40000000-0000-0000-0000-000000000001",
+          "displayName": "GSA - Require compliant device for Internet Access"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.filteringProfile",
+      "id": "00000000-0000-0000-0000-000000000002",
+      "name": "Contractors - Restricted",
+      "description": "Tighter web filtering for external contractors.",
+      "state": "enabled",
+      "priority": 200,
+      "createdDateTime": "2026-02-20T11:00:00Z",
+      "lastModifiedDateTime": "2026-04-10T08:15:00Z",
+      "policies": [
+        {
+          "@odata.type": "#microsoft.graph.networkaccess.filteringPolicyLink",
+          "id": "10000000-0000-0000-0000-000000000002",
+          "state": "disabled",
+          "loggingState": "enabled",
+          "priority": 1,
+          "policy": {
+            "id": "20000000-0000-0000-0000-000000000002",
+            "name": "Allow-list business sites",
+            "description": "Permits only an approved set of business domains.",
+            "version": "3",
+            "action": "allow",
+            "policyRules": [
+              {
+                "@odata.type": "#microsoft.graph.networkaccess.urlFilteringRule",
+                "id": "30000000-0000-0000-0000-000000000003",
+                "name": "Allow corporate SaaS",
+                "priority": 100,
+                "ruleType": "url",
+                "destinations": [
+                  {
+                    "@odata.type": "#microsoft.graph.networkaccess.url",
+                    "value": "https://portal.example-corp.com/*"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "conditionalAccessPolicies": [
+        {
+          "id": "40000000-0000-0000-0000-000000000002",
+          "displayName": "GSA - Contractor session controls"
+        }
+      ]
+    }
+  ],
+  "conditionalAccessPolicies": [
+    {
+      "id": "40000000-0000-0000-0000-000000000001",
+      "displayName": "GSA - Require compliant device for Internet Access",
+      "state": "enabled",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeUsers": ["90000000-0000-0000-0000-000000000002"],
+          "includeGroups": [],
+          "excludeGroups": []
+        },
+        "applications": { "includeApplications": ["All"], "excludeApplications": [] }
+      },
+      "sessionControls": {
+        "globalSecureAccessFilteringProfile": {
+          "isEnabled": true,
+          "profileId": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["compliantDevice"],
+        "authenticationStrength": null
+      }
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000002",
+      "displayName": "GSA - Contractor session controls",
+      "state": "enabled",
+      "conditions": {
+        "users": {
+          "includeUsers": [],
+          "excludeUsers": [],
+          "includeGroups": [
+            "91000000-0000-0000-0000-000000000001",
+            "91000000-0000-0000-0000-000000000002"
+          ],
+          "excludeGroups": []
+        },
+        "applications": {
+          "includeApplications": ["50000000-0000-0000-0000-000000000001"],
+          "excludeApplications": []
+        }
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [],
+        "authenticationStrength": {
+          "id": "00000000-0000-0000-0000-000000000004",
+          "displayName": "Phishing-resistant MFA"
+        }
+      }
+    }
+  ],
+  "authenticationStrengthPolicies": [
+    {
+      "id": "00000000-0000-0000-0000-000000000004",
+      "displayName": "Phishing-resistant MFA",
+      "policyType": "builtIn",
+      "allowedCombinations": ["windowsHelloForBusiness", "fido2", "x509CertificateMultiFactor"]
+    }
+  ],
+  "directoryObjects": [
+    {
+      "id": "90000000-0000-0000-0000-000000000002",
+      "@odata.type": "#microsoft.graph.user",
+      "displayName": "Break-glass Admin",
+      "userPrincipalName": "breakglass@example-corp.com"
+    },
+    {
+      "id": "91000000-0000-0000-0000-000000000001",
+      "@odata.type": "#microsoft.graph.group",
+      "displayName": "Contractors"
+    },
+    {
+      "id": "91000000-0000-0000-0000-000000000002",
+      "@odata.type": "#microsoft.graph.group",
+      "displayName": "Finance Team"
+    }
+  ],
+  "privateAccessApps": [
+    {
+      "id": "60000000-0000-0000-0000-000000000001",
+      "appId": "50000000-0000-0000-0000-000000000001",
+      "displayName": "Private - Internal HR Portal",
+      "tags": ["PrivateAccessNonWebApplication"],
+      "customSecurityAttributes": { "GSA": { "AppSensitivity": "High" } },
+      "applicationObjectId": "65000000-0000-0000-0000-000000000001",
+      "isDnsResolutionEnabled": false,
+      "appRoleAssignmentRequired": true,
+      "appRoleAssignedTo": [
+        {
+          "principalId": "40000000-0000-0000-0000-000000000003",
+          "principalType": "Group",
+          "principalDisplayName": "HR Staff"
+        }
+      ],
+      "applicationSegments": [
+        {
+          "id": "a1000000-0000-0000-0000-000000000001",
+          "destinationHost": "hr-portal.internal.example-corp.com",
+          "destinationType": "fqdn",
+          "port": 0,
+          "ports": ["443-443"],
+          "protocol": "tcp",
+          "action": "tunnel",
+          "exclusions": null,
+          "inclusions": null
+        },
+        {
+          "id": "a1000000-0000-0000-0000-000000000002",
+          "destinationHost": "10.20.30.40",
+          "destinationType": "ip",
+          "port": 0,
+          "ports": ["1433-1433"],
+          "protocol": "tcp",
+          "action": "tunnel",
+          "exclusions": null,
+          "inclusions": null
+        }
+      ]
+    },
+    {
+      "id": "60000000-0000-0000-0000-000000000002",
+      "appId": "50000000-0000-0000-0000-000000000002",
+      "displayName": "Quick Access",
+      "tags": ["NetworkAccessQuickAccessApplication"],
+      "customSecurityAttributes": {},
+      "applicationObjectId": "65000000-0000-0000-0000-000000000002",
+      "isDnsResolutionEnabled": true,
+      "appRoleAssignmentRequired": false,
+      "appRoleAssignedTo": [],
+      "applicationSegments": [
+        {
+          "id": "a2000000-0000-0000-0000-000000000001",
+          "destinationHost": "internal.example-corp.com",
+          "destinationType": "dnsSuffix",
+          "port": 0,
+          "ports": [],
+          "protocol": "0",
+          "action": "tunnel",
+          "exclusions": null,
+          "inclusions": null
+        },
+        {
+          "id": "a2000000-0000-0000-0000-000000000002",
+          "destinationHost": "10.0.0.0/8",
+          "destinationType": "ipRangeCidr",
+          "port": 0,
+          "ports": ["1-65535"],
+          "protocol": "tcp,udp",
+          "action": "tunnel",
+          "exclusions": null,
+          "inclusions": null
+        },
+        {
+          "id": "a2000000-0000-0000-0000-000000000003",
+          "destinationHost": "192.168.10.10",
+          "destinationType": "ip",
+          "port": 0,
+          "ports": ["53-53"],
+          "protocol": "tcp,udp",
+          "action": "tunnel",
+          "exclusions": null,
+          "inclusions": null
+        }
+      ]
+    }
+  ],
+  "appProxyApps": [
+    {
+      "id": "70000000-0000-0000-0000-000000000001",
+      "displayName": "Legacy Intranet (App Proxy)",
+      "onPremisesPublishing": {
+        "isOnPremPublishingEnabled": true,
+        "externalAuthenticationType": "aadPreAuthentication",
+        "externalUrl": "https://intranet-contoso.msappproxy.net/",
+        "internalUrl": "https://intranet.internal.example-corp.com/"
+      }
+    }
+  ],
+  "forwardingProfiles": [
+    {
+      "id": "80000000-0000-0000-0000-000000000001",
+      "name": "Internet access profile",
+      "state": "enabled",
+      "trafficForwardingType": "internet",
+      "priority": 300,
+      "policies": [
+        {
+          "id": "81000000-0000-0000-0000-000000000001",
+          "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicyLink",
+          "state": "enabled",
+          "policy": {
+            "id": "82000000-0000-0000-0000-000000000001",
+            "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicy",
+            "name": "Internet acquisition rules",
+            "trafficForwardingType": "internet",
+            "policyRules": [
+              {
+                "id": "83000000-0000-0000-0000-000000000001",
+                "@odata.type": "#microsoft.graph.networkaccess.forwardingRule",
+                "name": "Bypass corporate download CDN",
+                "ruleType": "fqdn",
+                "action": "bypass",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.downloads-cdn.contoso.com" }
+                ]
+              },
+              {
+                "id": "83000000-0000-0000-0000-000000000002",
+                "@odata.type": "#microsoft.graph.networkaccess.forwardingRule",
+                "name": "Forward all internet traffic",
+                "ruleType": "fqdn",
+                "action": "forward",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*" }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "80000000-0000-0000-0000-000000000002",
+      "@odata.type": "#microsoft.graph.networkaccess.forwardingProfile",
+      "name": "Microsoft 365 access profile",
+      "state": "enabled",
+      "trafficForwardingType": "m365",
+      "priority": 100,
+      "clientFallbackAction": "bypass",
+      "associations": [],
+      "policies": [
+        {
+          "id": "84000000-0000-0000-0000-000000000001",
+          "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicyLink",
+          "state": "enabled",
+          "priority": null,
+          "policy": {
+            "id": "85000000-0000-0000-0000-000000000001",
+            "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicy",
+            "name": "Exchange Online",
+            "trafficForwardingType": "m365",
+            "policyRules": [
+              {
+                "id": "86000000-0000-0000-0000-000000000001",
+                "@odata.type": "#microsoft.graph.networkaccess.m365ForwardingRule",
+                "name": "Exchange Online Optimized",
+                "ruleType": "fqdn",
+                "action": "forward",
+                "category": "optimized",
+                "ports": ["443"],
+                "protocol": "tcp",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.protection.outlook.com" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.mail.protection.outlook.com" }
+                ]
+              },
+              {
+                "id": "86000000-0000-0000-0000-000000000002",
+                "@odata.type": "#microsoft.graph.networkaccess.m365ForwardingRule",
+                "name": "Exchange Online Allow",
+                "ruleType": "fqdn",
+                "action": "forward",
+                "category": "allow",
+                "ports": ["443", "587"],
+                "protocol": "tcp",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "outlook.office.com" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "outlook.office365.com" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "smtp.office365.com" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "84000000-0000-0000-0000-000000000002",
+          "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicyLink",
+          "state": "enabled",
+          "priority": null,
+          "policy": {
+            "id": "85000000-0000-0000-0000-000000000002",
+            "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicy",
+            "name": "SharePoint Online and OneDrive",
+            "trafficForwardingType": "m365",
+            "policyRules": [
+              {
+                "id": "86000000-0000-0000-0000-000000000003",
+                "@odata.type": "#microsoft.graph.networkaccess.m365ForwardingRule",
+                "name": "SharePoint Optimized",
+                "ruleType": "fqdn",
+                "action": "forward",
+                "category": "optimized",
+                "ports": ["443"],
+                "protocol": "tcp",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.sharepoint.com" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.svc.ms" }
+                ]
+              },
+              {
+                "id": "86000000-0000-0000-0000-000000000004",
+                "@odata.type": "#microsoft.graph.networkaccess.m365ForwardingRule",
+                "name": "OneDrive Allow",
+                "ruleType": "fqdn",
+                "action": "forward",
+                "category": "allow",
+                "ports": ["443"],
+                "protocol": "tcp",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.files.1drv.com" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "onedrive.live.com" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "_comment": "Teams tunneling is disabled — customer has not yet enabled Teams real-time media acquisition.",
+          "id": "84000000-0000-0000-0000-000000000003",
+          "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicyLink",
+          "state": "disabled",
+          "priority": null,
+          "policy": {
+            "id": "85000000-0000-0000-0000-000000000003",
+            "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicy",
+            "name": "Microsoft Teams",
+            "trafficForwardingType": "m365",
+            "policyRules": [
+              {
+                "id": "86000000-0000-0000-0000-000000000005",
+                "@odata.type": "#microsoft.graph.networkaccess.m365ForwardingRule",
+                "name": "Teams Real-time Media",
+                "ruleType": "ipSubnet",
+                "action": "forward",
+                "category": "optimized",
+                "ports": ["3478-3481"],
+                "protocol": "udp",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.ipSubnet", "value": "13.107.64.0/18" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.ipSubnet", "value": "52.112.0.0/14" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.ipSubnet", "value": "52.122.0.0/15" }
+                ]
+              },
+              {
+                "id": "86000000-0000-0000-0000-000000000006",
+                "@odata.type": "#microsoft.graph.networkaccess.m365ForwardingRule",
+                "name": "Teams Signaling and Chat",
+                "ruleType": "fqdn",
+                "action": "forward",
+                "category": "allow",
+                "ports": ["443"],
+                "protocol": "tcp",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.teams.microsoft.com" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "teams.microsoft.com" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "84000000-0000-0000-0000-000000000004",
+          "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicyLink",
+          "state": "enabled",
+          "priority": null,
+          "policy": {
+            "id": "85000000-0000-0000-0000-000000000004",
+            "@odata.type": "#microsoft.graph.networkaccess.forwardingPolicy",
+            "name": "Microsoft 365 Common and Office Online",
+            "trafficForwardingType": "m365",
+            "policyRules": [
+              {
+                "id": "86000000-0000-0000-0000-000000000007",
+                "@odata.type": "#microsoft.graph.networkaccess.m365ForwardingRule",
+                "name": "M365 Common Allow",
+                "ruleType": "fqdn",
+                "action": "forward",
+                "category": "allow",
+                "ports": ["443"],
+                "protocol": "tcp",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.microsoftonline.com" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.office.com" },
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.office.net" }
+                ]
+              },
+              {
+                "id": "86000000-0000-0000-0000-000000000008",
+                "@odata.type": "#microsoft.graph.networkaccess.m365ForwardingRule",
+                "name": "Bypass Office CDN",
+                "ruleType": "fqdn",
+                "action": "bypass",
+                "category": "default",
+                "ports": ["443", "80"],
+                "protocol": "tcp",
+                "destinations": [
+                  { "@odata.type": "#microsoft.graph.networkaccess.fqdn", "value": "*.cdn.office.net" }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "80000000-0000-0000-0000-000000000003",
+      "name": "Private access profile",
+      "state": "disabled",
+      "trafficForwardingType": "private",
+      "priority": 200
+    }
+  ],
+  "tenantPolicies": [
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.webContentFilteringPolicy",
+      "id": "20000000-0000-0000-0000-000000000001",
+      "name": "Block High-Risk Categories"
+    },
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.webContentFilteringPolicy",
+      "id": "20000000-0000-0000-0000-000000000002",
+      "name": "Allow-list business sites"
+    },
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.filePolicy",
+      "id": "20000000-0000-0000-0000-0000000000c1",
+      "name": "Data Protection - Outbound"
+    },
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.cloudFirewallPolicy",
+      "id": "20000000-0000-0000-0000-0000000000d1",
+      "name": "CFW-Pol-001"
+    },
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.webContentFilteringPolicy",
+      "id": "20000000-0000-0000-0000-0000000000f1",
+      "name": "Legacy Social Media Block (unused)"
+    },
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.tlsInspectionPolicy",
+      "id": "20000000-0000-0000-0000-0000000000f2",
+      "name": "Draft TLS inspection - not deployed"
+    },
+    {
+      "@odata.type": "#microsoft.graph.networkaccess.promptPolicy",
+      "id": "20000000-0000-0000-0000-0000000000f3",
+      "name": "Prompt-Pol-02-Experimental"
+    }
+  ]
+}
