@@ -97,6 +97,8 @@ Two things to get right when hosting under a repository subpath:
 
 The **Graph adapter** (`src/adapters/graph/`) is the key abstraction. Every Graph call goes through it, and every call passes through an audit interceptor that records the endpoint template (never populated URLs — no tenant, user, or policy identifiers). Do not call Graph from components.
 
+> **Note on automated tests.** This project's automated test suite hasn't been published to this repo yet. If you'd like us to share it, please open a GitHub Issue and vote for it.
+
 ## How to contribute
 
 Please create a GitHub Issue to discuss the changes you are planning to make, then send us a PR.
